@@ -12,6 +12,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
+import org.example.javafxdb_sql_shellcode.db.ConnDbOps;
 
 import java.io.File;
 import java.net.URL;
@@ -20,57 +21,59 @@ import java.util.ResourceBundle;
 
 public class DB_GUI_Controller implements Initializable {
 
-    private final ObservableList<Person> data =
-            FXCollections.observableArrayList(
-                    new Person(1, "Jacob", "Smith", "jacoz@hotmail.com", "6314573678", "29 Main Street", "12345"),
-                    new Person(2, "John", "Smith", "coolcatz@hotmail.com", "631457458", "29 Main Street", "54321")
-            );
+    private final ObservableList<Person> data = FXCollections.observableArrayList();
+
+    public void fillList() {
+    }
 
 
     @FXML
-    TextField first_name, last_name, email, phone, address, password;
+    TextField name, email, phone, address, password;
     @FXML
     private TableView<Person> tv;
     @FXML
     private TableColumn<Person, Integer> tv_id;
     @FXML
-    private TableColumn<Person, String> tv_fn, tv_ln, tv_email, tv_phone, tv_address, tv_password;
+    private TableColumn<Person, String> tv_name, tv_email, tv_phone, tv_address, tv_password;
+
+    private int count = 0;
 
     @FXML
     ImageView img_view;
+
+    ConnDbOps database = new ConnDbOps();
 
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         tv_id.setCellValueFactory(new PropertyValueFactory<>("id"));
-        tv_fn.setCellValueFactory(new PropertyValueFactory<>("firstName"));
-        tv_ln.setCellValueFactory(new PropertyValueFactory<>("lastName"));
+        tv_name.setCellValueFactory(new PropertyValueFactory<>("name"));
         tv_email.setCellValueFactory(new PropertyValueFactory<>("email"));
         tv_address.setCellValueFactory(new PropertyValueFactory<>("address"));
         tv_phone.setCellValueFactory(new PropertyValueFactory<>("phone"));
-        tv_password.setCellValueFactory(new PropertyValueFactory<>("password"));
         tv.setItems(data);
+        count = database.getCount();
+        System.out.println(count);
+        database.addUsersToList(data); //fill list
     }
 
 
     @FXML
     protected void addNewRecord() {
-        data.add(new Person(
-                data.size()+1,
-                first_name.getText(),
-                last_name.getText(),
-                email.getText(),
-                address.getText(),
-                phone.getText(),
-                password.getText()
-        ));
-
+        if(uniqueEmail(email.getText())) {
+            email.setStyle("-fx-border-color: null");
+            count++;
+            Person person = new Person(count, name.getText(), email.getText(), address.getText(), phone.getText(), password.getText());
+            data.add(person);
+            database.insertUser(person); // adds a user to the database
+        }
+        else
+            email.setStyle("-fx-border-color: red");
     }
 
     @FXML
     protected void clearForm() {
-        first_name.clear();
-        last_name.setText("");
+        name.setText("");
         email.setText("");
         address.setText("");
         phone.setText("");
@@ -85,16 +88,17 @@ public class DB_GUI_Controller implements Initializable {
 
     @FXML
     protected void editRecord() {
+        email.setStyle("-fx-border-color: null");
         Person p= tv.getSelectionModel().getSelectedItem();
-        int c=data.indexOf(p);
+        int c= p.getId();
         Person p2= new Person();
-        p2.setId(c+1);
-        p2.setFirstName(first_name.getText());
-        p2.setLastName(last_name.getText());
+        p2.setId(c);
+        p2.setName(name.getText());
         p2.setEmail(email.getText());
         p2.setAddress(address.getText());
         p2.setPhone(phone.getText());
         p2.setPassword(password.getText());
+        database.updateUser(p2); //updates user in the database
         data.remove(c);
         data.add(c,p2);
         tv.getSelectionModel().select(c);
@@ -102,7 +106,14 @@ public class DB_GUI_Controller implements Initializable {
 
     @FXML
     protected void deleteRecord() {
+        email.setStyle("-fx-border-color: null");
         Person p= tv.getSelectionModel().getSelectedItem();
+        if(p == null) {
+            return;
+        }
+        if(count == p.getId())
+            count--;
+        database.removeUser(p);//deletes the person from the database
         data.remove(p);
     }
 
@@ -124,13 +135,17 @@ public class DB_GUI_Controller implements Initializable {
     protected void selectedItemTV(MouseEvent mouseEvent) {
         if(tv.getSelectionModel().getSelectedItem() != null) {
             Person p = tv.getSelectionModel().getSelectedItem();
-            first_name.setText(p.getFirstName());
-            last_name.setText(p.getLastName());
+            name.setText(p.getName());
             email.setText(p.getEmail());
             address.setText(p.getAddress());
             phone.setText(p.getPhone());
             password.setText(p.getPassword());
         }
 
+    }
+    public boolean uniqueEmail(String email) {
+        if(email != null)
+            return !data.stream().anyMatch(person -> person.getEmail().equals(email));
+        return false;
     }
 }

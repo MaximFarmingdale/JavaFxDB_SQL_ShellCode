@@ -4,16 +4,14 @@ public class Person {
 
 
     private Integer id;
-    private String firstName;
-    private String lastName;
+    private String name;
     private String email;
     private String phone;
     private String address;
     private String password;
-    public Person(Integer id, String firstName, String lastName, String email, String phone, String address, String password) {
+    public Person(Integer id, String name, String email, String phone, String address, String password) {
         this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.name = name;
         this.email = email;
         this.phone = phone;
         this.address = address;
@@ -28,18 +26,12 @@ public class Person {
     public void setId(Integer id) {
         this.id = id;
     }
-    public String getFirstName() {
-        return firstName;
-    }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public String getName() {
+        return name;
     }
-    public String getLastName() {
-        return lastName;
-    }
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setName(String name) {
+        this.name = name;
     }
 
 

@@ -4,6 +4,7 @@
  */
 package org.example.javafxdb_sql_shellcode.db;
 
+import javafx.collections.ObservableList;
 import org.example.javafxdb_sql_shellcode.Person;
 
 import java.sql.Connection;
@@ -96,7 +97,7 @@ public class ConnDbOps {
         }
     }
 
-    public  void listAllUsers() {
+    public void listAllUsers() {
 
 
 
@@ -121,6 +122,50 @@ public class ConnDbOps {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+    /// adds all previous person data to the observable list to use in the table.
+    /// very similar code to listAllUsers
+    public void addUsersToList(ObservableList<Person> list) {
+        try {
+            Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
+            String sql = "SELECT * FROM users ";
+            PreparedStatement preparedStatement = conn.prepareStatement(sql);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String name = resultSet.getString("name");
+                String email = resultSet.getString("email");
+                String phone = resultSet.getString("phone");
+                String address = resultSet.getString("address");
+                String password = resultSet.getString("password");
+                list.add(new Person(id, name, email, phone, address, password));
+            }
+
+            preparedStatement.close();
+            conn.close();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    /// gets the count of how many elements there are
+    public int getCount() {
+        try {
+            Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
+            String sql = "SELECT MAX(ID) AS countid FROM users";
+            PreparedStatement preparedStatement = conn.prepareStatement(sql);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                int temp =  resultSet.getInt("countid");
+                preparedStatement.close();
+                conn.close();
+                return temp;
+            }
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     public  void insertUser(String name, String email, String phone, String address, String password) {
@@ -148,10 +193,43 @@ public class ConnDbOps {
             e.printStackTrace();
         }
     }
-    public  void updateUser(String name, String email, String phone, String address, String password, Person person) {
+    /// insertUser method that uses a person object
+    public  boolean insertUser(Person person) {
+        try {
+            String name = person.getName();
+            String email = person.getEmail();
+            String phone = person.getPhone();
+            String address = person.getAddress();
+            String password = person.getPassword();
+
+            Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
+            String sql = "INSERT INTO users (name, email, phone, address, password) VALUES (?, ?, ?, ?, ?)";
+            PreparedStatement preparedStatement = conn.prepareStatement(sql);
+            preparedStatement.setString(1, name);
+            preparedStatement.setString(2, email);
+            preparedStatement.setString(3, phone);
+            preparedStatement.setString(4, address);
+            preparedStatement.setString(5, password);
+
+            int row = preparedStatement.executeUpdate();
+
+            if (row > 0) {
+                System.out.println("A new user was inserted successfully.");
+            }
+
+            preparedStatement.close();
+            conn.close();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public  void updateUser(String name, String email, String phone, String address, String password) {
         try {
             Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
-            String sql = "UPDATE users (name, email, phone, address, password) VALUES (?, ?, ?, ?, ?)";
+            String sql = "UPDATE users SET name = ?, email = ?, phone = ?, address = ?, password = ? WHERE id = ?";
             PreparedStatement preparedStatement = conn.prepareStatement(sql);
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, email);
@@ -171,6 +249,39 @@ public class ConnDbOps {
             e.printStackTrace();
         }
     }
+    /// update user that uses a person object to update the user
+    public  void updateUser(Person person) {
+        try {
+            Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
+            String sql = "UPDATE users SET name = ?, email = ?, phone = ?, address = ?, password = ? WHERE id = ?";
+            PreparedStatement preparedStatement = conn.prepareStatement(sql);
+            preparedStatement.setString(1, person.getName());
+            preparedStatement.setString(2, person.getEmail());
+            preparedStatement.setString(3, person.getPhone());
+            preparedStatement.setString(4, person.getAddress());
+            preparedStatement.setString(5, person.getPassword());
+            preparedStatement.setInt(6, person.getId());
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public  void removeUser(Person person) {
+        try {
+            Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
+            String sql = "DELETE FROM users WHERE id = ?";
+            PreparedStatement preparedStatement = conn.prepareStatement(sql);
+            preparedStatement.setInt(1, person.getId());
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     
 }
