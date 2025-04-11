@@ -20,6 +20,9 @@ public class Person {
     public Person() {
 
     }
+    public Person(int id) {
+        this.id = id;
+    }
     public Integer getId() {
         return id;
     }

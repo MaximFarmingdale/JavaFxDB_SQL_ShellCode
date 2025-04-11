@@ -23,9 +23,6 @@ public class DB_GUI_Controller implements Initializable {
 
     private final ObservableList<Person> data = FXCollections.observableArrayList();
 
-    public void fillList() {
-    }
-
 
     @FXML
     TextField name, email, phone, address, password;
@@ -54,21 +51,21 @@ public class DB_GUI_Controller implements Initializable {
         tv.setItems(data);
         count = database.getCount();
         System.out.println(count);
-        database.addUsersToList(data); //fill list
+        database.addUsersToList(data); //fill list with previous elements in the database
     }
 
 
     @FXML
     protected void addNewRecord() {
         if(uniqueEmail(email.getText())) {
-            email.setStyle("-fx-border-color: null");
+            email.setStyle("-fx-border-color: null"); //changes the border color back to normal
             count++;
             Person person = new Person(count, name.getText(), email.getText(), address.getText(), phone.getText(), password.getText());
             data.add(person);
             database.insertUser(person); // adds a user to the database
         }
         else
-            email.setStyle("-fx-border-color: red");
+            email.setStyle("-fx-border-color: red");//changes the border color to red if you type a non-unique email
     }
 
     @FXML
@@ -88,7 +85,7 @@ public class DB_GUI_Controller implements Initializable {
 
     @FXML
     protected void editRecord() {
-        email.setStyle("-fx-border-color: null");
+        email.setStyle("-fx-border-color: null"); //changes border color back to normal
         Person p= tv.getSelectionModel().getSelectedItem();
         int c= p.getId();
         Person p2= new Person();
@@ -106,7 +103,7 @@ public class DB_GUI_Controller implements Initializable {
 
     @FXML
     protected void deleteRecord() {
-        email.setStyle("-fx-border-color: null");
+        email.setStyle("-fx-border-color: null"); //changes border color back to normal
         Person p= tv.getSelectionModel().getSelectedItem();
         if(p == null) {
             return;

@@ -70,7 +70,6 @@ public class ConnDbOps {
 
         return hasRegistredUsers;
     }
-
     public  void queryUserByName(String name) {
 
 
@@ -148,7 +147,7 @@ public class ConnDbOps {
             e.printStackTrace();
         }
     }
-    /// gets the count of how many elements there are
+    /// gets the count of how many elements there are in the database
     public int getCount() {
         try {
             Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
@@ -226,17 +225,17 @@ public class ConnDbOps {
         return false;
     }
 
-    public  void updateUser(String name, String email, String phone, String address, String password) {
+    public  void updateUser(String name, String email, String phone, String address, String password, String orginalName) {
         try {
             Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
-            String sql = "UPDATE users SET name = ?, email = ?, phone = ?, address = ?, password = ? WHERE id = ?";
+            String sql = "UPDATE users SET name = ?, email = ?, phone = ?, address = ?, password = ? WHERE name = ?";
             PreparedStatement preparedStatement = conn.prepareStatement(sql);
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, email);
             preparedStatement.setString(3, phone);
             preparedStatement.setString(4, address);
             preparedStatement.setString(5, password);
-
+            preparedStatement.setString(6, orginalName);
             int row = preparedStatement.executeUpdate();
 
             if (row > 0) {
@@ -249,7 +248,7 @@ public class ConnDbOps {
             e.printStackTrace();
         }
     }
-    /// update user that uses a person object to update the user
+    /// update user that uses a person object to update the user, mainly used for the GUI
     public  void updateUser(Person person) {
         try {
             Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
@@ -268,12 +267,27 @@ public class ConnDbOps {
             e.printStackTrace();
         }
     }
+    /// remove user method that uses a person object to match id and delete a user, mainly used in GUI
     public  void removeUser(Person person) {
         try {
             Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
             String sql = "DELETE FROM users WHERE id = ?";
             PreparedStatement preparedStatement = conn.prepareStatement(sql);
             preparedStatement.setInt(1, person.getId());
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    /// removes user based on name
+    public  void removeUser(String name) {
+        try {
+            Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
+            String sql = "DELETE FROM users WHERE name = ?";
+            PreparedStatement preparedStatement = conn.prepareStatement(sql);
+            preparedStatement.setString(1, name);
             preparedStatement.executeUpdate();
             preparedStatement.close();
             conn.close();

@@ -7,7 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.Scanner;
-import javafx.scene.paint.Color;
+
 import org.example.javafxdb_sql_shellcode.db.ConnDbOps;
 
 /**
@@ -48,6 +48,8 @@ public class App extends Application {
             System.out.println("| To display all users,   press 'a' |");
             System.out.println("| To insert to the DB,    press 'i' |");
             System.out.println("| To query by name,       press 'q' |");
+            System.out.println("| To delete by name,      press 'd' |");
+            System.out.println("| To edit by name,        press 't' |");
             System.out.println("| To exit,                press 'e' |");
             System.out.println("===================================");
             System.out.print("Enter your choice: ");
@@ -86,6 +88,30 @@ public class App extends Application {
                 case 'e':
                     System.out.println("Exiting...");
                     break;
+                    //deleting an element based on name
+                    //would make more sense to delete elements based on email instead of name but
+                    //the other methods also change elements by name, so I did it by name for consistency
+                    case 'd':
+                        System.out.print("Enter the name to delete: ");
+                        String deleteName = scan.next();
+                        cdbop.removeUser(deleteName);
+                        break;
+                        //editing an element based on name
+                        case 't':
+                            System.out.print("Enter the name to edit: ");
+                            String orginalName = scan.next();
+                            System.out.print("Enter Name: ");
+                            String editName = scan.next();
+                            System.out.print("Enter Email: ");
+                            String editEmail = scan.next();
+                            System.out.print("Enter Phone: ");
+                            String editPhone = scan.next();
+                            System.out.print("Enter Address: ");
+                            String editAddress = scan.next();
+                            System.out.print("Enter Password: ");
+                            String editPassword = scan.next();
+                            cdbop.updateUser(editName, editEmail, editPhone, editAddress, editPassword, orginalName);
+                            break;
                 default:
                     System.out.println("Invalid option. Please try again.");
             }
