@@ -10,6 +10,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import org.example.javafxdb_sql_shellcode.db.ConnDbOps;
@@ -33,7 +35,7 @@ public class DB_GUI_Controller implements Initializable {
     @FXML
     private TableColumn<Person, String> tv_name, tv_email, tv_phone, tv_address, tv_password;
 
-    private int count = 0;
+    private int index = 0;
 
     @FXML
     ImageView img_view;
@@ -49,22 +51,21 @@ public class DB_GUI_Controller implements Initializable {
         tv_address.setCellValueFactory(new PropertyValueFactory<>("address"));
         tv_phone.setCellValueFactory(new PropertyValueFactory<>("phone"));
         tv.setItems(data);
-        count = database.getCount();
-        System.out.println(count);
+        index = database.getCount();
+        System.out.println(index);
         database.addUsersToList(data); //fill list with previous elements in the database
     }
 
 
     @FXML
     protected void addNewRecord() {
-        if(uniqueEmail(email.getText())) {
+        if (uniqueEmail(email.getText())) {
             email.setStyle("-fx-border-color: null"); //changes the border color back to normal
-            count++;
-            Person person = new Person(count, name.getText(), email.getText(), address.getText(), phone.getText(), password.getText());
+            index++;
+            Person person = new Person(index, name.getText(), email.getText(), address.getText(), phone.getText(), password.getText());
             data.add(person);
             database.insertUser(person); // adds a user to the database
-        }
-        else
+        } else
             email.setStyle("-fx-border-color: red");//changes the border color to red if you type a non-unique email
     }
 
@@ -86,51 +87,54 @@ public class DB_GUI_Controller implements Initializable {
     @FXML
     protected void editRecord() {
         email.setStyle("-fx-border-color: null"); //changes border color back to normal
-        Person p= tv.getSelectionModel().getSelectedItem();
-        int c= p.getId();
-        Person p2= new Person();
-        p2.setId(c);
+        Person p = tv.getSelectionModel().getSelectedItem();
+        if (p == null) {
+            return; //returns if no selected item
+        }
+        Person p2 = new Person();
+        p2.setId(p.getId());
         p2.setName(name.getText());
-        p2.setEmail(email.getText());
         p2.setAddress(address.getText());
         p2.setPhone(phone.getText());
         p2.setPassword(password.getText());
+        if(uniqueEmail(email.getText())) { //making sure the email is still unique
+            p2.setEmail(email.getText());
+        }
+        else
+            p2.setEmail(p.getEmail()); //sets email to previous email
+        int indexToUpdate = data.indexOf(p);
         database.updateUser(p2); //updates user in the database
-        data.remove(c);
-        data.add(c,p2);
-        tv.getSelectionModel().select(c);
+        data.remove(indexToUpdate);
+        data.add(indexToUpdate, p2);
+        tv.getSelectionModel().select(indexToUpdate);
     }
 
     @FXML
     protected void deleteRecord() {
         email.setStyle("-fx-border-color: null"); //changes border color back to normal
-        Person p= tv.getSelectionModel().getSelectedItem();
-        if(p == null) {
-            return;
+        Person p = tv.getSelectionModel().getSelectedItem();
+        if (p == null) {
+            return; //returns if no selected item
         }
-        if(count == p.getId())
-            count--;
+        if (index == p.getId())
+            index--;
         database.removeUser(p);//deletes the person from the database
         data.remove(p);
     }
 
 
-
     @FXML
     protected void showImage() {
-        File file= (new FileChooser()).showOpenDialog(img_view.getScene().getWindow());
-        if(file!=null){
+        File file = (new FileChooser()).showOpenDialog(img_view.getScene().getWindow());
+        if (file != null) {
             img_view.setImage(new Image(file.toURI().toString()));
         }
     }
 
 
-
-
-
     @FXML
     protected void selectedItemTV(MouseEvent mouseEvent) {
-        if(tv.getSelectionModel().getSelectedItem() != null) {
+        if (tv.getSelectionModel().getSelectedItem() != null) {
             Person p = tv.getSelectionModel().getSelectedItem();
             name.setText(p.getName());
             email.setText(p.getEmail());
@@ -140,9 +144,29 @@ public class DB_GUI_Controller implements Initializable {
         }
 
     }
+
     public boolean uniqueEmail(String email) {
-        if(email != null)
+        if (email != null)
             return !data.stream().anyMatch(person -> person.getEmail().equals(email));
         return false;
+    }
+
+    @FXML
+    void shortCuts(KeyEvent event) {
+        if (event.isControlDown() && event.getCode() == KeyCode.F) {
+            showImage();
+        }
+        if (event.isControlDown() && event.getCode() == KeyCode.C) {
+            clearForm();
+        }
+        if (event.isControlDown() && event.getCode() == KeyCode.D) {
+            deleteRecord();
+        }
+        if (event.isControlDown() && event.getCode() == KeyCode.E) {
+            editRecord();
+        }
+        if (event.isControlDown() && event.getCode() == KeyCode.D) {
+            deleteRecord();
+        }
     }
 }

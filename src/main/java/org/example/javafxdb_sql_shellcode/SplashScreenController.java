@@ -6,6 +6,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
 
 import java.io.IOException;
 
@@ -14,7 +15,7 @@ public class SplashScreenController {
     @FXML
     void clickme(MouseEvent event) {
         Parent newRoot;
-        Scene scene= ((ImageView)event.getSource()).getParent().getScene();
+        Scene scene= ((GridPane)event.getSource()).getScene();
 
         try {
             newRoot = FXMLLoader.load(getClass().getResource("db_interface_gui.fxml"));
@@ -23,7 +24,6 @@ public class SplashScreenController {
         }
 
         scene.setRoot(newRoot);
-
     }
 
 }

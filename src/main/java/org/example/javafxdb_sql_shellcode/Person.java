@@ -1,5 +1,7 @@
 package org.example.javafxdb_sql_shellcode;
 
+import javafx.scene.shape.Path;
+
 public class Person {
 
 
@@ -9,6 +11,7 @@ public class Person {
     private String phone;
     private String address;
     private String password;
+    private Path image;
     public Person(Integer id, String name, String email, String phone, String address, String password) {
         this.id = id;
         this.name = name;
@@ -19,6 +22,15 @@ public class Person {
     }
     public Person() {
 
+    }
+    public Person(Integer id, String name, String email, String phone, String address, String password, Path image) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.address = address;
+        this.password = password;
+        this.image = image;
     }
     public Person(int id) {
         this.id = id;
@@ -64,6 +76,12 @@ public class Person {
     }
     public void setPassword(String password) {
         this.password = password;
+    }
+    public Path getImage() {
+        return image;
+    }
+    public void setImage(Path image) {
+        this.image = image;
     }
 
 
